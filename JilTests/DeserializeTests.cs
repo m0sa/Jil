@@ -6235,5 +6235,30 @@ namespace JilTests
         //        }
         //    );
         //}
+
+        public class TupleContainer
+        {
+            public Tuple<string, IEnumerable<string>> StringOrStringArray;
+        }
+
+        [TestMethod]
+        public void Tuples()
+        {
+            var str = "{\"StringOrStringArray\":\"string\"}";
+            var result = JSON.Deserialize<TupleContainer>(str);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.StringOrStringArray);
+            Assert.AreEqual("string", result.StringOrStringArray.Item1);
+            Assert.IsNull(result.StringOrStringArray.Item2);
+
+            str = "{\"StringOrStringArray\":[\"string\",\"array\"]}";
+
+            result = JSON.Deserialize<TupleContainer>(str);
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.StringOrStringArray);
+            Assert.IsNull(result.StringOrStringArray.Item1);
+            CollectionAssert.AreEqual(new[] { "string", "array" }, result.StringOrStringArray.Item2.ToArray());
+        }
     }
 }

@@ -911,6 +911,7 @@ namespace Jil.Common
                         r => !(r.IsPrimitiveType() ||   // all the types we handle extra specially
                                r.IsEnum || 
                                r.IsNullableType() ||
+                               r.IsTupleType() ||
                                r.IsListType() ||
                                r.IsDictionaryType() ||
                                r.IsReadOnlyListType() ||

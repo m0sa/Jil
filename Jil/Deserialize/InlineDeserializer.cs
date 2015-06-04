@@ -2225,6 +2225,45 @@ namespace Jil.Deserialize
                 return;
             }
 
+            if (forType.IsTupleType())
+            {
+                using (var tuple = Emit.DeclareLocal<DeserializeDynamic.JsonObject>())        // JsonObject tuple
+                using (var converted = Emit.DeclareLocal<object>())                           // object converted
+                {
+                    var typeFromHandle = typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle));
+                    ReadDynamic();                                                            // JsonObject
+                    Emit.StoreLocal(tuple);                                                   // JsonObject tuple = pop()
+
+                    // stack on parameters for the Tuple ctor
+                    var itemTypes = forType.GetGenericArguments();
+                    for (int i = 0; i < itemTypes.Length; i++)
+                    {
+                        var type = itemTypes[i];
+                        if (type.IsValueType)
+                        {
+                            throw new ConstructionException("Only reference types are supported as Tuple<> members.");
+                        }
+
+                        Emit.LoadLocal(tuple);                                                // tuple
+                        Emit.LoadConstant(type);                                              // tuple (RuntimeTypeHandle)type
+                        Emit.Call(typeFromHandle);                                            // tuple (Type)type
+                        Emit.LoadLocalAddress(converted);                                     // tuple (Type)type &converted
+                        Emit.CallVirtual(DeserializeDynamic.JsonObject.InnerTryConvertMtd);   // bool
+
+                        // don't care for now.. alternatively we could throw if none of the itemTypes matched and ReadDynamic parsed any content?
+                        Emit.Pop();
+
+                        // InnerTryConvert returns null for stuff it can't understand, which we can cast to anything
+                        Emit.LoadLocal(converted);                                            // converted
+                        Emit.CastClass(type);                                                 // (type)converted
+                    }
+
+                    var constructor = forType.GetConstructor(itemTypes);
+                    Emit.NewObject(constructor);
+                }
+                return;
+            }
+
             ReadObject(forType);
         }
 

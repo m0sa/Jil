@@ -887,7 +887,7 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        static MethodInfo InnerTryConvertMtd = typeof(JsonObject).GetMethod("InnerTryConvert", BindingFlags.NonPublic | BindingFlags.Instance);
+        public static MethodInfo InnerTryConvertMtd = typeof(JsonObject).GetMethod("InnerTryConvert", BindingFlags.NonPublic | BindingFlags.Instance);
         bool InnerTryConvert(Type returnType, out object result)
         {
             if (returnType == typeof(object))

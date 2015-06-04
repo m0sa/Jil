@@ -208,9 +208,9 @@ namespace Jil.Common
 
         /// <summary>
         /// HACK: This is a best effort attempt to divine if a type is anonymous based on the language spec.
-        /// 
+        ///
         /// Reference section 7.6.10.6 of the C# language spec as of 2012/11/19
-        /// 
+        ///
         /// It checks:
         ///     - is a class
         ///     - descends directly from object
@@ -305,7 +305,7 @@ namespace Jil.Common
 
         static readonly IEnumerable<OpCode> ReadOnlyOpCodes =
             new[]
-            {   
+            {
                 OpCodes.Ldc_I4,     // Constant integer numbers
                 OpCodes.Ldc_I4_0,
                 OpCodes.Ldc_I4_1,
@@ -346,7 +346,7 @@ namespace Jil.Common
                 OpCodes.Ldnull      // always null
             };
 
-        static readonly IEnumerable<OpCode> ConstantLoadOpCodes = 
+        static readonly IEnumerable<OpCode> ConstantLoadOpCodes =
             new[]
             {
                 OpCodes.Ldc_I4_0,
@@ -578,7 +578,7 @@ namespace Jil.Common
             {
                 return "\"" + type.GetEnumValueName(obj).JsonEscape(jsonp) + "\"";
             }
-            
+
             var formattable = obj as IFormattable;
             if (formattable != null)
                 return formattable.ToString(null, CultureInfo.InvariantCulture);
@@ -759,7 +759,7 @@ namespace Jil.Common
 
             // any methods that aren't property accessors? bail
             if (mtds.Any(m => !props.Any(p => p.GetMethod == m || p.SetMethod == m))) return false;
-            
+
             // define a property that takes parameters? bail
             if (props.Any(p => p.GetIndexParameters().Length != 0)) return false;
 
@@ -1093,6 +1093,22 @@ namespace Jil.Common
             var reusedTypes = Utils.FindReusedTypes(forType);
 
             return new HashSet<Type>(recursive.Concat(reusedTypes));
+        }
+        public static bool IsTupleType(this Type t)
+        {
+            if (!t.IsGenericType) return false;
+            t = t.GetGenericTypeDefinition();
+            return
+                t == (typeof(Tuple<>)) ||
+                t == (typeof(Tuple<,>)) ||
+                t == (typeof(Tuple<,,>)) ||
+                t == (typeof(Tuple<,,,>)) ||
+                t == (typeof(Tuple<,,,,>)) ||
+                t == (typeof(Tuple<,,,,,>)) ||
+                t == (typeof(Tuple<,,,,,,>)) ||
+                t == (typeof(Tuple<,,,,,,,>)) ||
+                false;
+
         }
     }
 }
